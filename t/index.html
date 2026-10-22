@@ -73,7 +73,7 @@
     if (!list || !list.length) { rows.innerHTML = '<tr><td class="muted">עוד אין רישומים היום</td></tr>'; }
     list.forEach(function (e) {
       var tr = document.createElement('tr'); if (e.kind === 'out') tr.className = 'out';
-      tr.innerHTML = '<td style="width:70px"><strong>' + C.esc(e.time) + '</strong></td><td>' + (e.kind === 'out' ? 'סיום עבודה' : C.esc(e.location || 'מיקום לא ידוע')) + '</td>';
+      tr.innerHTML = '<td style="width:70px"><strong>' + C.esc(e.time) + '</strong></td><td>' + (e.kind === 'out' ? 'סיום עבודה' : C.esc(e.location || (e.tag_id ? 'מיקום שנמחק' : 'ללא מיקום'))) + '</td>';
       rows.appendChild(tr);
     });
     $('todayCard').classList.remove('hidden');

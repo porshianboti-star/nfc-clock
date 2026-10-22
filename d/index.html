@@ -189,7 +189,7 @@
         var tr = document.createElement('tr'); if (e.kind === 'out') tr.className = 'out';
         var flag = e.flags.indexOf('far') >= 0 ? ' <span class="pill warn" title="המיקום שדווח רחוק מהמדבקה">' + (e.distance_m != null ? e.distance_m + ' מ׳ מהמדבקה' : 'רחוק') + '</span>' : e.flags.indexOf('no_gps') >= 0 ? ' <span class="pill gray">ללא GPS</span>' : '';
         var src = e.source === 'manual' ? ' <span class="pill gray">ידני</span>' : '';
-        tr.innerHTML = '<td><strong>' + C.esc(e.time) + '</strong></td><td>' + C.esc(e.worker || '') + '</td><td>' + (e.kind === 'out' ? 'סיום עבודה' : C.esc(e.location || 'מיקום שנמחק')) + flag + src + (e.note ? ' <span class="muted small">' + C.esc(e.note) + '</span>' : '') + '</td><td><button class="sm danger" data-del="' + e.id + '">מחק</button></td>';
+        tr.innerHTML = '<td><strong>' + C.esc(e.time) + '</strong></td><td>' + C.esc(e.worker || '') + '</td><td>' + (e.kind === 'out' ? 'סיום עבודה' : C.esc(e.location || (e.tag_id ? 'מיקום שנמחק' : 'ללא מיקום'))) + flag + src + (e.note ? ' <span class="muted small">' + C.esc(e.note) + '</span>' : '') + '</td><td><button class="sm danger" data-del="' + e.id + '">מחק</button></td>';
         rows.appendChild(tr);
       });
       $('refreshNote').textContent = 'עודכן ' + new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
