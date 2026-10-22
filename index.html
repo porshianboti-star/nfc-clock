@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>שעון נוכחות NFC — בלי אפליקציה</title>
+<meta name="description" content="שעון נוכחות למעסיקים עם עובדים בשטח: מדביקים מדבקת NFC באתר, העובד מצמיד את הטלפון, הנוכחות נרשמת. בלי אפליקציה, בלי חומרה.">
+<link rel="stylesheet" href="assets/app.css">
+<script src="config.js"></script>
+<script src="assets/app.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><h1>שעון נוכחות NFC</h1><span class="org">גרסת ניסיון</span></header>
+
+  <div class="card">
+    <div class="big">נוכחות בהצמדה אחת. בלי אפליקציה.</div>
+    <p>מדביקים מדבקת NFC בכניסה לאתר, למפעל או למוסד. העובד מצמיד את הטלפון, דף קטן נפתח לבד, והנוכחות נרשמת עם שעה, שם ומיקום. המנהל רואה הכול בטבלה חיה.</p>
+    <ul class="clean">
+      <li><strong>בלי התקנה לעובד.</strong> שולחים לו לינק אישי בוואטסאפ פעם אחת, וזהו.</li>
+      <li><strong>בלי חומרה.</strong> מדבקת NFC רגילה בכמה שקלים, אפשר להדביק גם על שלט או דלת.</li>
+      <li><strong>כמה אתרים שרוצים.</strong> כל מדבקה מקבלת שם מיקום, והטבלה מראה מי היה איפה ומתי.</li>
+    </ul>
+  </div>
+
+  <div class="card" id="signup">
+    <h2>פתיחת דשבורד לעסק</h2>
+    <label for="orgName">שם העסק</label>
+    <input id="orgName" maxlength="80" placeholder="לדוגמה: ניקיון הצפון בע״מ" autocomplete="organization">
+    <div style="margin-top:12px"><button class="primary block" id="createBtn">צור דשבורד</button></div>
+    <p class="small muted" id="signupErr"></p>
+    <p class="small muted">תקבל לינק ניהול סודי. מי שמחזיק בו מנהל את החשבון, אז שמור אותו כמו סיסמה.</p>
+  </div>
+
+  <div class="card hidden" id="created">
+    <h2 class="ok">הדשבורד מוכן</h2>
+    <p>זה לינק הניהול שלך. <strong>שמור אותו עכשיו</strong> (סימניה, מנהל סיסמאות, מייל לעצמך). אין דרך לשחזר אותו.</p>
+    <div class="code" id="adminUrl"></div>
+    <div class="row" style="margin-top:12px">
+      <button id="copyAdmin">העתק לינק</button>
+      <a class="btn primary" id="openAdmin" href="#">פתח את הדשבורד</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>איך זה עובד</h2>
+    <ol>
+      <li>פותחים דשבורד ומוסיפים את המיקומים (״בית ספר אלונים״, ״מחסן״). לכל מיקום נוצרת כתובת ייחודית.</li>
+      <li>כותבים את הכתובת על מדבקת NFC (מהדשבורד בטלפון אנדרואיד, או עם אפליקציית כתיבה חינמית) ומדביקים בכניסה.</li>
+      <li>מוסיפים עובדים ושולחים לכל אחד את לינק ההתקנה האישי שלו. פתיחה אחת מחברת את הטלפון.</li>
+      <li>מכאן העובד רק מצמיד. אתם רואים שעה, שם ומיקום בזמן אמת ומייצאים לאקסל.</li>
+    </ol>
+  </div>
+
+  <footer>שעון נוכחות NFC · גרסת ניסיון · <a href="d/">כניסה לדשבורד קיים</a></footer>
+</div>
+<script>
+(function () {
+  var C = window.Clock, $ = function (id) { return document.getElementById(id); };
+  $('createBtn').addEventListener('click', function () {
+    var name = $('orgName').value.trim();
+    if (!name) { $('orgName').focus(); return; }
+    var b = $('createBtn'); b.disabled = true; b.textContent = 'יוצר…'; $('signupErr').textContent = '';
+    C.api('/signup', { body: { org_name: name } }).then(function (r) {
+      var url = C.siteBase() + 'd/?k=' + r.admin_key;
+      $('adminUrl').textContent = url; $('openAdmin').href = url;
+      $('copyAdmin').onclick = function () { C.copy(url); };
+      $('signup').classList.add('hidden'); $('created').classList.remove('hidden');
+      try { localStorage.setItem('clock_admin_key', r.admin_key); } catch (e) {}
+    }, function (err) { b.disabled = false; b.textContent = 'צור דשבורד'; $('signupErr').textContent = C.msg(err); });
+  });
+})();
+</script>
+</body>
+</html>

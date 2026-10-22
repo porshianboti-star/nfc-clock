@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>רישום נוכחות</title>
+<link rel="stylesheet" href="../assets/app.css">
+<script src="../config.js"></script>
+<script src="../assets/app.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><h1>שעון נוכחות</h1><span class="org" id="orgName"></span></header>
+
+  <!-- state: working -->
+  <div class="card center" id="working">
+    <div class="spinner"></div>
+    <div id="workingText">רושם נוכחות…</div>
+    <div class="muted small" id="gpsNote">מאתר מיקום (עד כמה שניות)</div>
+  </div>
+
+  <!-- state: done -->
+  <div class="card center hidden" id="done">
+    <div class="check">✓</div>
+    <div class="big" id="doneTitle"></div>
+    <div id="doneSub" class="muted"></div>
+    <div id="doneFlag" class="small warn"></div>
+  </div>
+
+  <!-- state: not bound -->
+  <div class="card hidden" id="notBound">
+    <h2>הטלפון הזה עדיין לא מחובר</h2>
+    <p>כדי לרשום נוכחות, פתח פעם אחת את <strong>לינק ההתקנה האישי</strong> שקיבלת מהמנהל (בוואטסאפ או במייל). אחרי זה כל הצמדה למדבקה נרשמת לבד.</p>
+    <p class="muted small">אין לך לינק? בקש מהמנהל שלך לשלוח אותו שוב.</p>
+  </div>
+
+  <!-- state: error -->
+  <div class="card hidden" id="error">
+    <h2 class="bad">לא נרשם</h2>
+    <p id="errorText"></p>
+    <button class="primary block" onclick="location.reload()">נסה שוב</button>
+  </div>
+
+  <!-- today -->
+  <div class="card hidden" id="todayCard">
+    <h2>היום</h2>
+    <table><tbody id="todayRows"></tbody></table>
+    <div style="margin-top:14px">
+      <button class="block" id="outBtn">סיום יום עבודה</button>
+      <div class="muted small center" style="margin-top:8px">לוחצים פעם אחת כשמסיימים את היום. מעבר לאתר אחר? פשוט מצמידים למדבקה שם.</div>
+    </div>
+  </div>
+
+  <div class="card hidden" id="noCode">
+    <h2>חסר קוד מדבקה</h2>
+    <p>הדף הזה נפתח מהצמדת הטלפון למדבקת NFC של העסק. אם הגעת לכאן אחרת, אין מה לעשות פה.</p>
+  </div>
+
+  <footer><a href="../s/" id="rebindLink" class="muted">להחליף עובד בטלפון הזה</a></footer>
+</div>
+<script>
+(function () {
+  var C = window.Clock, $ = function (id) { return document.getElementById(id); };
+  var code = (C.qs('c') || location.hash.replace('#', '')).toUpperCase().replace(/[^A-Z2-9]/g, '');
+  var token = C.getToken();
+  var tz = 'Asia/Jerusalem';
+
+  function show(id) { ['working', 'done', 'notBound', 'error', 'noCode'].forEach(function (x) { $(x).classList.toggle('hidden', x !== id); }); }
+
+  function renderToday(list) {
+    var rows = $('todayRows'); rows.innerHTML = '';
+    if (!list || !list.length) { rows.innerHTML = '<tr><td class="muted">עוד אין רישומים היום</td></tr>'; }
+    list.forEach(function (e) {
+      var tr = document.createElement('tr'); if (e.kind === 'out') tr.className = 'out';
+      tr.innerHTML = '<td style="width:70px"><strong>' + C.esc(e.time) + '</strong></td><td>' + (e.kind === 'out' ? 'סיום עבודה' : C.esc(e.location || 'מיקום לא ידוע')) + '</td>';
+      rows.appendChild(tr);
+    });
+    $('todayCard').classList.remove('hidden');
+  }
+
+  function finish(r) {
+    show('done');
+    var e = r.event;
+    $('doneTitle').textContent = (r.worker && r.worker.name ? r.worker.name + ', ' : '') + (r.dup ? 'כבר נרשמת' : 'נרשמת');
+    $('doneSub').textContent = (e.location || '') + ' · ' + e.time;
+    var f = e.flags || [];
+    $('doneFlag').textContent = f.indexOf('far') >= 0 ? 'המיקום שלך רחוק מהמדבקה. הרישום נשמר עם סימון למנהל.' : f.indexOf('no_gps') >= 0 ? 'ללא מיקום GPS (אפשר לאשר מיקום בהגדרות הדפדפן).' : '';
+    renderToday(r.today);
+    if (navigator.vibrate) try { navigator.vibrate(60); } catch (x) {}
+  }
+
+  function fail(err) {
+    if (err.message === 'not_bound' || err.message === 'worker_inactive') { show('notBound'); if (err.message === 'worker_inactive') $('notBound').querySelector('h2').textContent = 'העובד הזה הושבת'; return; }
+    show('error'); $('errorText').textContent = C.msg(err);
+  }
+
+  function tap() {
+    show('working');
+    C.locate(7000).then(function (pos) {
+      $('gpsNote').textContent = pos ? 'מיקום נמצא, שולח…' : 'בלי מיקום, שולח…';
+      var body = { code: code };
+      if (pos) { body.lat = pos.lat; body.lng = pos.lng; body.accuracy = pos.accuracy; }
+      return C.api('/tap', { body: body, worker: token });
+    }).then(finish, fail);
+  }
+
+  $('outBtn').addEventListener('click', function () {
+    var b = $('outBtn'); b.disabled = true; b.textContent = 'רושם…';
+    C.locate(5000).then(function (pos) {
+      var body = {}; if (pos) { body.lat = pos.lat; body.lng = pos.lng; body.accuracy = pos.accuracy; }
+      return C.api('/out', { body: body, worker: token });
+    }).then(function (r) {
+      b.textContent = 'נרשם סיום עבודה ✓';
+      $('doneTitle').textContent = 'יום טוב!'; $('doneSub').textContent = 'סיום עבודה · ' + r.event.time; $('doneFlag').textContent = '';
+      show('done'); renderToday(r.today);
+    }, function (err) { b.disabled = false; b.textContent = 'סיום יום עבודה'; C.toast(C.msg(err)); });
+  });
+
+  if (!code) { show('noCode'); return; }
+  if (!token) { show('notBound'); return; }
+  tap();
+})();
+</script>
+</body>
+</html>

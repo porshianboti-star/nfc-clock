@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>דשבורד נוכחות</title>
+<link rel="stylesheet" href="../assets/app.css">
+<script src="../config.js"></script>
+<script src="../assets/app.js"></script>
+</head>
+<body>
+<div class="wrap wide">
+  <header class="top"><h1>דשבורד נוכחות</h1><span class="org" id="orgName"></span></header>
+
+  <div class="card hidden" id="noKey">
+    <h2>כניסה לדשבורד</h2>
+    <p>הדבק את לינק הניהול שקיבלת כשפתחת את החשבון (או רק את המפתח שבסופו).</p>
+    <input id="keyInput" placeholder="https://…/d/?k=…">
+    <div style="margin-top:10px"><button class="primary" id="keyGo">כניסה</button> <a class="btn" href="../">אין לי חשבון</a></div>
+  </div>
+
+  <div id="app" class="hidden">
+    <div class="tabs">
+      <button data-tab="today" class="on">נוכחות</button>
+      <button data-tab="workers">עובדים</button>
+      <button data-tab="tags">מדבקות ומיקומים</button>
+      <button data-tab="export">ייצוא</button>
+    </div>
+
+    <!-- ===== today ===== -->
+    <section id="tab-today">
+      <div class="card">
+        <div class="row">
+          <button class="fix sm" id="prevDay">‹ יום קודם</button>
+          <input type="date" id="day" class="fix" style="width:auto">
+          <button class="fix sm" id="nextDay">יום הבא ›</button>
+          <span class="muted small" id="refreshNote"></span>
+        </div>
+      </div>
+      <div class="card" id="nowCard">
+        <h2>עכשיו בעבודה</h2>
+        <div id="nowList" class="muted small">—</div>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th style="width:70px">שעה</th><th>שם</th><th>מיקום</th><th style="width:120px"></th></tr></thead>
+          <tbody id="eventRows"></tbody>
+        </table>
+        <div class="row" style="margin-top:14px">
+          <button class="sm fix" id="manualBtn">+ הוסף רישום ידני</button>
+        </div>
+        <div id="manualBox" class="hidden" style="margin-top:10px">
+          <div class="row">
+            <select id="mWorker"></select>
+            <select id="mKind"><option value="in">כניסה</option><option value="out">סיום עבודה</option></select>
+            <select id="mTag"></select>
+            <input type="time" id="mTime">
+            <input id="mNote" placeholder="הערה (לא חובה)" maxlength="200">
+            <button class="primary fix" id="mSave">שמור</button>
+          </div>
+          <p class="small muted">רישום ידני מסומן כ״ידני״ בייצוא. משמש למי ששכח לסמן.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== workers ===== -->
+    <section id="tab-workers" class="hidden">
+      <div class="card">
+        <h2>הוספת עובד</h2>
+        <div class="row">
+          <input id="wName" placeholder="שם מלא" maxlength="60">
+          <input id="wPhone" placeholder="נייד (לשליחה בוואטסאפ, לא חובה)" maxlength="24" inputmode="tel">
+          <button class="primary fix" id="wAdd">הוסף</button>
+        </div>
+        <p class="small muted">אחרי ההוספה שולחים לעובד את לינק ההתקנה האישי שלו. פתיחה אחת בטלפון, וזהו.</p>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>שם</th><th>מצב</th><th>לינק התקנה</th><th></th></tr></thead>
+          <tbody id="workerRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== tags ===== -->
+    <section id="tab-tags" class="hidden">
+      <div class="card">
+        <h2>הוספת מיקום (מדבקה)</h2>
+        <div class="row">
+          <input id="tLoc" placeholder="שם המיקום, למשל: בית ספר אלונים" maxlength="80">
+          <button class="fix" id="tGps">קח את המיקום הנוכחי שלי</button>
+          <button class="primary fix" id="tAdd">צור מדבקה</button>
+        </div>
+        <p class="small muted" id="tGpsNote">כדאי ללחוץ ״קח את המיקום הנוכחי״ כשאתה עומד ליד המדבקה. ככה רישום מרחוק מסומן למנהל.</p>
+      </div>
+      <div class="card">
+        <table>
+          <thead><tr><th>מיקום</th><th>קוד</th><th>GPS</th><th></th></tr></thead>
+          <tbody id="tagRows"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h2>איך כותבים את הכתובת על המדבקה</h2>
+        <ul class="clean small">
+          <li><strong>אנדרואיד (Chrome):</strong> לחץ ״כתוב למדבקה״ ליד המיקום, הצמד מדבקה ריקה לגב הטלפון.</li>
+          <li><strong>אייפון:</strong> התקן אפליקציית כתיבה חינמית (למשל NFC Tools), בחר Write ← Add a record ← URL, הדבק את הכתובת שהעתקת, לחץ Write והצמד.</li>
+          <li>מדבקה שכבר נכתבה אפשר לכתוב מחדש. על דלת מתכת צריך מדבקה עם גב אנטי-מתכת, או להדביק על שלט פלסטיק.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== export ===== -->
+    <section id="tab-export" class="hidden">
+      <div class="card">
+        <h2>ייצוא לאקסל (CSV)</h2>
+        <div class="row">
+          <div><label>מתאריך</label><input type="date" id="xFrom"></div>
+          <div><label>עד תאריך</label><input type="date" id="xTo"></div>
+          <button class="primary fix" id="xGo" style="align-self:flex-end">הורד קובץ</button>
+        </div>
+        <p class="small muted">הקובץ נפתח באקסל בעברית תקינה. עמודות: תאריך, שעה, שם, מיקום, סוג, מרחק מהמדבקה, דגלים, מקור, הערה.</p>
+      </div>
+      <div class="card">
+        <h2>לינק הניהול</h2>
+        <p class="small">כל מי שמחזיק בלינק הזה רואה ועורך את הנוכחות. שמור אותו במקום בטוח.</p>
+        <button class="sm" id="copyAdminLink">העתק את לינק הניהול</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function () {
+  var C = window.Clock, $ = function (id) { return document.getElementById(id); };
+  var KEY_RE = /^[A-Za-z0-9_-]{40,48}$/;
+  var key = C.qs('k') || location.hash.replace('#', '');
+  if (!key) { try { key = localStorage.getItem('clock_admin_key') || ''; } catch (e) {} }
+  var state = { org: null, workers: [], tags: [], day: C.todayLocal(), timer: null };
+
+  function show(sel) { ['today', 'workers', 'tags', 'export'].forEach(function (t) { $('tab-' + t).classList.toggle('hidden', t !== sel); }); document.querySelectorAll('.tabs button').forEach(function (b) { b.classList.toggle('on', b.dataset.tab === sel); }); }
+  document.querySelectorAll('.tabs button').forEach(function (b) { b.addEventListener('click', function () { show(b.dataset.tab); }); });
+
+  function A(path, opts) { opts = opts || {}; opts.admin = key; return C.api(path, opts); }
+  function base() { return C.siteBase(); }
+  function installUrl(w) { return base() + 's/?k=' + w.install_key; }
+  function tagUrl(t) { return base() + 't/?c=' + t.code; }
+  function waUrl(w) {
+    var text = 'היי ' + w.name + ', זה לינק ההתקנה האישי שלך לשעון הנוכחות של ' + state.org.name + '. פתח אותו פעם אחת בטלפון: ' + installUrl(w);
+    var phone = (w.phone || '').replace(/\D/g, '');
+    if (phone.indexOf('0') === 0) phone = '972' + phone.slice(1);
+    return 'https://wa.me/' + phone + '?text=' + encodeURIComponent(text);
+  }
+
+  // ---- login gate ----
+  if (!KEY_RE.test(key)) {
+    $('noKey').classList.remove('hidden');
+    $('keyGo').addEventListener('click', function () {
+      var v = $('keyInput').value.trim(); var m = v.match(/k=([A-Za-z0-9_-]{40,48})/); v = m ? m[1] : v;
+      if (!KEY_RE.test(v)) { C.toast('הלינק לא נראה תקין'); return; }
+      location.href = location.pathname + '?k=' + v;
+    });
+    return;
+  }
+  try { localStorage.setItem('clock_admin_key', key); } catch (e) {}
+  if (C.qs('k')) history.replaceState(null, '', location.pathname); // keep the secret out of the address bar
+  $('app').classList.remove('hidden');
+
+  // ---- overview (org, workers, tags, who is in now) ----
+  function loadOverview() {
+    return A('/admin/overview').then(function (r) {
+      state.org = r.org; state.workers = r.workers; state.tags = r.tags;
+      $('orgName').textContent = r.org.name; document.title = r.org.name + ' · נוכחות';
+      renderNow(); renderWorkers(); renderTags(); fillManualSelects();
+    });
+  }
+  function renderNow() {
+    var ins = state.workers.filter(function (w) { return w.last && w.last.kind === 'in'; });
+    $('nowList').innerHTML = ins.length ? ins.map(function (w) { return '<span class="pill">' + C.esc(w.name) + ' · ' + C.esc(w.last.location || '') + ' · ' + C.esc(w.last.time) + '</span> '; }).join('') : '<span class="muted">אף אחד לא רשום כרגע בעבודה</span>';
+  }
+
+  // ---- events of a day ----
+  function loadDay() {
+    $('day').value = state.day;
+    return A('/admin/events?from=' + state.day + '&to=' + state.day).then(function (r) {
+      var rows = $('eventRows'); rows.innerHTML = '';
+      if (!r.events.length) rows.innerHTML = '<tr><td colspan="4" class="muted">אין רישומים ביום הזה</td></tr>';
+      r.events.forEach(function (e) {
+        var tr = document.createElement('tr'); if (e.kind === 'out') tr.className = 'out';
+        var flag = e.flags.indexOf('far') >= 0 ? ' <span class="pill warn" title="המיקום שדווח רחוק מהמדבקה">' + (e.distance_m != null ? e.distance_m + ' מ׳ מהמדבקה' : 'רחוק') + '</span>' : e.flags.indexOf('no_gps') >= 0 ? ' <span class="pill gray">ללא GPS</span>' : '';
+        var src = e.source === 'manual' ? ' <span class="pill gray">ידני</span>' : '';
+        tr.innerHTML = '<td><strong>' + C.esc(e.time) + '</strong></td><td>' + C.esc(e.worker || '') + '</td><td>' + (e.kind === 'out' ? 'סיום עבודה' : C.esc(e.location || 'מיקום שנמחק')) + flag + src + (e.note ? ' <span class="muted small">' + C.esc(e.note) + '</span>' : '') + '</td><td><button class="sm danger" data-del="' + e.id + '">מחק</button></td>';
+        rows.appendChild(tr);
+      });
+      $('refreshNote').textContent = 'עודכן ' + new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+    });
+  }
+  $('eventRows').addEventListener('click', function (ev) {
+    var id = ev.target && ev.target.dataset && ev.target.dataset.del; if (!id) return;
+    if (!confirm('למחוק את הרישום הזה?')) return;
+    A('/admin/events/' + id, { method: 'DELETE' }).then(function () { refresh(); }, function (e) { C.toast(C.msg(e)); });
+  });
+  function shiftDay(n) { var d = new Date(state.day + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); state.day = d.toISOString().slice(0, 10); loadDay(); }
+  $('prevDay').addEventListener('click', function () { shiftDay(-1); });
+  $('nextDay').addEventListener('click', function () { shiftDay(1); });
+  $('day').addEventListener('change', function () { if ($('day').value) { state.day = $('day').value; loadDay(); } });
+
+  // ---- manual entry ----
+  function fillManualSelects() {
+    $('mWorker').innerHTML = state.workers.filter(function (w) { return w.active; }).map(function (w) { return '<option value="' + w.id + '">' + C.esc(w.name) + '</option>'; }).join('');
+    $('mTag').innerHTML = '<option value="">(בלי מיקום)</option>' + state.tags.map(function (t) { return '<option value="' + t.id + '">' + C.esc(t.location) + '</option>'; }).join('');
+  }
+  $('manualBtn').addEventListener('click', function () { $('manualBox').classList.toggle('hidden'); });
+  $('mKind').addEventListener('change', function () { $('mTag').disabled = $('mKind').value === 'out'; });
+  $('mSave').addEventListener('click', function () {
+    var time = $('mTime').value; if (!time) { C.toast('בחר שעה'); return; }
+    // local wall time of the chosen day in the org's zone → an instant
+    var ts = zonedToIso(state.day, time, state.org.tz);
+    A('/admin/events', { body: { worker_id: $('mWorker').value, kind: $('mKind').value, tag_id: $('mKind').value === 'in' ? ($('mTag').value || null) : null, ts: ts, note: $('mNote').value } })
+      .then(function () { $('mNote').value = ''; $('manualBox').classList.add('hidden'); refresh(); C.toast('נשמר'); }, function (e) { C.toast(C.msg(e)); });
+  });
+  function zonedToIso(date, hhmm, tz) {
+    var guess = new Date(date + 'T' + hhmm + ':00Z').getTime();
+    for (var i = 0; i < 3; i++) {
+      var parts = new Intl.DateTimeFormat('en-CA', { timeZone: tz, hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).formatToParts(new Date(guess)).reduce(function (o, p) { o[p.type] = p.value; return o; }, {});
+      var asUtc = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour % 24, +parts.minute);
+      var target = new Date(date + 'T' + hhmm + ':00Z').getTime();
+      var next = target - (asUtc - guess); if (next === guess) break; guess = next;
+    }
+    return new Date(guess).toISOString();
+  }
+
+  // ---- workers ----
+  function renderWorkers() {
+    var rows = $('workerRows'); rows.innerHTML = '';
+    if (!state.workers.length) rows.innerHTML = '<tr><td colspan="4" class="muted">עוד אין עובדים. הוסף את הראשון למעלה.</td></tr>';
+    state.workers.forEach(function (w) {
+      var tr = document.createElement('tr'); if (!w.active) tr.className = 'out';
+      var st = !w.active ? '<span class="pill gray">מושבת</span>' : w.bound ? '<span class="pill">טלפון מחובר</span>' : '<span class="pill warn">עוד לא פתח את הלינק</span>';
+      tr.innerHTML = '<td><strong>' + C.esc(w.name) + '</strong><div class="small muted">' + C.esc(w.phone || '') + '</div></td><td>' + st + '</td>' +
+        '<td><button class="sm" data-act="copy" data-id="' + w.id + '">העתק לינק</button> <a class="btn sm" target="_blank" rel="noopener" href="' + waUrl(w) + '">שלח בוואטסאפ</a></td>' +
+        '<td>' + (w.bound ? '<button class="sm" data-act="unbind" data-id="' + w.id + '">נתק טלפון</button> ' : '') + '<button class="sm ' + (w.active ? 'danger' : '') + '" data-act="toggle" data-id="' + w.id + '">' + (w.active ? 'השבת' : 'הפעל') + '</button></td>';
+      rows.appendChild(tr);
+    });
+  }
+  $('wAdd').addEventListener('click', function () {
+    var name = $('wName').value.trim(); if (!name) { $('wName').focus(); return; }
+    A('/admin/workers', { body: { name: name, phone: $('wPhone').value.trim() || null } }).then(function () { $('wName').value = ''; $('wPhone').value = ''; loadOverview(); C.toast('נוסף'); }, function (e) { C.toast(C.msg(e)); });
+  });
+  $('workerRows').addEventListener('click', function (ev) {
+    var b = ev.target.closest && ev.target.closest('button[data-act]'); if (!b) return;
+    var w = state.workers.filter(function (x) { return x.id === b.dataset.id; })[0]; if (!w) return;
+    if (b.dataset.act === 'copy') return C.copy(installUrl(w));
+    if (b.dataset.act === 'unbind') { if (!confirm('לנתק את הטלפון של ' + w.name + '? הוא יצטרך לפתוח את הלינק שוב.')) return; return A('/admin/workers/' + w.id, { method: 'PATCH', body: { unbind: true } }).then(loadOverview, function (e) { C.toast(C.msg(e)); }); }
+    if (b.dataset.act === 'toggle') return A('/admin/workers/' + w.id, { method: 'PATCH', body: { active: !w.active } }).then(loadOverview, function (e) { C.toast(C.msg(e)); });
+  });
+
+  // ---- tags ----
+  var pendingGps = null;
+  function renderTags() {
+    var rows = $('tagRows'); rows.innerHTML = '';
+    if (!state.tags.length) rows.innerHTML = '<tr><td colspan="4" class="muted">עוד אין מיקומים. צור את המדבקה הראשונה למעלה.</td></tr>';
+    var canNfc = 'NDEFReader' in window;
+    state.tags.forEach(function (t) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td><strong>' + C.esc(t.location) + '</strong><div class="small muted code">' + C.esc(tagUrl(t)) + '</div></td><td><span class="code">' + C.esc(t.code) + '</span></td>' +
+        '<td class="small">' + (t.lat != null ? '✓ ' + t.lat.toFixed(4) + ', ' + t.lng.toFixed(4) : '<span class="muted">לא הוגדר</span>') + ' <button class="sm" data-act="gps" data-id="' + t.id + '">עדכן למיקומי</button></td>' +
+        '<td><button class="sm" data-act="copy" data-id="' + t.id + '">העתק כתובת</button> ' + (canNfc ? '<button class="sm primary" data-act="write" data-id="' + t.id + '">כתוב למדבקה</button> ' : '') + '<button class="sm danger" data-act="del" data-id="' + t.id + '">מחק</button></td>';
+      rows.appendChild(tr);
+    });
+  }
+  $('tGps').addEventListener('click', function () {
+    $('tGpsNote').textContent = 'מאתר…';
+    C.locate(10000).then(function (p) { pendingGps = p; $('tGpsNote').textContent = p ? 'המיקום נשמר (דיוק ' + p.accuracy + ' מ׳). עכשיו תן שם וצור מדבקה.' : 'לא הצלחתי לקבל מיקום. אפשר ליצור בלי, ולעדכן אחר כך.'; });
+  });
+  $('tAdd').addEventListener('click', function () {
+    var loc = $('tLoc').value.trim(); if (!loc) { $('tLoc').focus(); return; }
+    var body = { location: loc }; if (pendingGps) { body.lat = pendingGps.lat; body.lng = pendingGps.lng; body.radius_m = Math.max(150, Math.min(500, pendingGps.accuracy * 2)); }
+    A('/admin/tags', { body: body }).then(function () { $('tLoc').value = ''; pendingGps = null; $('tGpsNote').textContent = 'נוצר. העתק את הכתובת וכתוב אותה על המדבקה.'; loadOverview(); }, function (e) { C.toast(C.msg(e)); });
+  });
+  $('tagRows').addEventListener('click', function (ev) {
+    var b = ev.target.closest && ev.target.closest('button[data-act]'); if (!b) return;
+    var t = state.tags.filter(function (x) { return x.id === b.dataset.id; })[0]; if (!t) return;
+    if (b.dataset.act === 'copy') return C.copy(tagUrl(t));
+    if (b.dataset.act === 'del') { if (!confirm('למחוק את "' + t.location + '"? הרישומים הישנים יישארו בלי שם מיקום.')) return; return A('/admin/tags/' + t.id, { method: 'DELETE' }).then(loadOverview, function (e) { C.toast(C.msg(e)); }); }
+    if (b.dataset.act === 'gps') { C.toast('מאתר…'); return C.locate(10000).then(function (p) { if (!p) return C.toast('אין מיקום'); return A('/admin/tags/' + t.id, { method: 'PATCH', body: { lat: p.lat, lng: p.lng, radius_m: Math.max(150, Math.min(500, p.accuracy * 2)) } }).then(loadOverview); }); }
+    if (b.dataset.act === 'write') {
+      b.disabled = true; b.textContent = 'הצמד מדבקה…';
+      try {
+        new NDEFReader().write({ records: [{ recordType: 'url', data: tagUrl(t) }] }).then(function () { C.toast('נכתב למדבקה ✓'); }, function (e) { C.toast('הכתיבה נכשלה: ' + (e && e.message)); }).then(function () { b.disabled = false; b.textContent = 'כתוב למדבקה'; });
+      } catch (e) { b.disabled = false; b.textContent = 'כתוב למדבקה'; C.toast('הדפדפן הזה לא תומך בכתיבת NFC'); }
+    }
+  });
+
+  // ---- export ----
+  $('xFrom').value = state.day.slice(0, 8) + '01'; $('xTo').value = state.day;
+  $('xGo').addEventListener('click', function () {
+    var f = $('xFrom').value, t = $('xTo').value; if (!f || !t) return;
+    A('/admin/events?from=' + f + '&to=' + t + '&format=csv').then(function (csv) {
+      var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' }); var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'attendance-' + f + '-' + t + '.csv'; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    }, function (e) { C.toast(C.msg(e)); });
+  });
+  $('copyAdminLink').addEventListener('click', function () { C.copy(base() + 'd/?k=' + key); });
+
+  // ---- boot + refresh ----
+  function refresh() { return Promise.all([loadOverview(), loadDay()]); }
+  refresh().catch(function (e) {
+    if (e.status === 401) { try { localStorage.removeItem('clock_admin_key'); } catch (x) {} $('app').classList.add('hidden'); $('noKey').classList.remove('hidden'); C.toast(C.msg(e)); }
+    else C.toast(C.msg(e));
+  });
+  state.timer = setInterval(function () { if (!document.hidden && state.day === C.todayLocal(state.org && state.org.tz)) refresh().catch(function () {}); }, 15000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) refresh().catch(function () {}); });
+})();
+</script>
+</body>
+</html>

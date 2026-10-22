@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>חיבור הטלפון לשעון הנוכחות</title>
+<link rel="stylesheet" href="../assets/app.css">
+<script src="../config.js"></script>
+<script src="../assets/app.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><h1>שעון נוכחות</h1></header>
+
+  <div class="card center" id="working"><div class="spinner"></div><div>מחבר את הטלפון…</div></div>
+
+  <div class="card hidden" id="done">
+    <div class="check">✓</div>
+    <div class="big center" id="doneTitle"></div>
+    <p class="center muted" id="doneOrg"></p>
+    <div class="hint">
+      <strong>מעכשיו זה פשוט:</strong> כשמגיעים לאתר, מצמידים את הטלפון למדבקה בכניסה. הדף נפתח לבד והנוכחות נרשמת.
+      בסיום היום לוחצים ״סיום יום עבודה״ באותו דף.
+    </div>
+    <ul class="clean small muted" style="margin-top:12px">
+      <li>באייפון: הטלפון צריך להיות פתוח (מסך דלוק), מצמידים את החלק העליון של הטלפון למדבקה.</li>
+      <li>באנדרואיד: ודאו ש-NFC דלוק בהגדרות, מצמידים את גב הטלפון למדבקה.</li>
+      <li>בפעם הראשונה הדפדפן יבקש אישור מיקום. אשרו כדי שהרישום יהיה מדויק.</li>
+    </ul>
+    <p class="small muted">החלפתם טלפון? פתחו את הלינק הזה שוב מהטלפון החדש.</p>
+  </div>
+
+  <div class="card hidden" id="error">
+    <h2 class="bad">החיבור לא הצליח</h2>
+    <p id="errorText"></p>
+    <button class="primary block" onclick="location.reload()">נסה שוב</button>
+  </div>
+
+  <div class="card hidden" id="noKey">
+    <h2>חסר לינק אישי</h2>
+    <p>הדף הזה נפתח מלינק ההתקנה האישי שהמנהל שולח לכל עובד. בקש מהמנהל שלך את הלינק שלך.</p>
+    <p class="small muted" id="currentBound"></p>
+  </div>
+</div>
+<script>
+(function () {
+  var C = window.Clock, $ = function (id) { return document.getElementById(id); };
+  var key = C.qs('k') || location.hash.replace('#', '');
+  function show(id) { ['working', 'done', 'error', 'noKey'].forEach(function (x) { $(x).classList.toggle('hidden', x !== id); }); }
+  if (!key) {
+    show('noKey');
+    if (C.getToken()) {
+      C.api('/me', { worker: C.getToken() }).then(function (r) { $('currentBound').textContent = 'הטלפון הזה מחובר כרגע ל: ' + r.worker.name + ' (' + r.org.name + ').'; }, function () {});
+    }
+    return;
+  }
+  C.api('/bind', { body: { install_key: key } }).then(function (r) {
+    C.setToken(r.token);
+    history.replaceState(null, '', location.pathname); // the secret leaves the address bar / history
+    show('done');
+    $('doneTitle').textContent = 'שלום ' + r.worker.name + ', הטלפון מחובר';
+    $('doneOrg').textContent = r.org.name;
+  }, function (err) { show('error'); $('errorText').textContent = C.msg(err); });
+})();
+</script>
+</body>
+</html>

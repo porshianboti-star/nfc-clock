@@ -1,0 +1,56 @@
+/* NFC attendance clock — shared styles (RTL, mobile first) */
+:root {
+  --bg: #f4f6f8; --card: #ffffff; --ink: #14202b; --muted: #5b6b7a; --line: #dfe5ea;
+  --brand: #0f766e; --brand-ink: #ffffff; --ok: #15803d; --warn: #b45309; --bad: #b91c1c; --soft: #e6f4f2;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0f1418; --card: #171e24; --ink: #eef2f5; --muted: #9aa8b4; --line: #2a343d; --brand: #2dd4bf; --brand-ink: #062a27; --soft: #10302d; }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 -apple-system, "Segoe UI", Roboto, "Heebo", Arial, sans-serif; direction: rtl; }
+a { color: var(--brand); }
+.wrap { max-width: 720px; margin: 0 auto; padding: 16px; }
+.wide { max-width: 1040px; }
+header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0 16px; }
+header.top h1 { font-size: 20px; margin: 0; }
+header.top .org { color: var(--muted); font-size: 14px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
+.card h2 { font-size: 17px; margin: 0 0 10px; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.big { font-size: 28px; font-weight: 700; line-height: 1.2; }
+.ok { color: var(--ok); } .warn { color: var(--warn); } .bad { color: var(--bad); }
+button, .btn { font: inherit; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 10px; padding: 10px 16px; cursor: pointer; text-decoration: none; display: inline-block; }
+button.primary, .btn.primary { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); font-weight: 600; }
+button.danger { color: var(--bad); }
+button.sm { padding: 6px 10px; font-size: 14px; border-radius: 8px; }
+button:disabled { opacity: .55; cursor: default; }
+button.block { width: 100%; padding: 16px; font-size: 18px; }
+input, select { font: inherit; width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--ink); }
+label { display: block; font-size: 14px; color: var(--muted); margin: 10px 0 4px; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.row > * { flex: 1 1 140px; }
+.row > .fix { flex: 0 0 auto; }
+table { width: 100%; border-collapse: collapse; font-size: 15px; }
+th, td { text-align: right; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; font-size: 13px; }
+tr.out td { color: var(--muted); }
+.pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; background: var(--soft); color: var(--brand); }
+.pill.gray { background: var(--line); color: var(--muted); }
+.pill.warn { background: #fdf0e0; color: var(--warn); }
+.tabs { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; }
+.tabs button { white-space: nowrap; }
+.tabs button.on { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+.spinner { width: 28px; height: 28px; border: 3px solid var(--line); border-top-color: var(--brand); border-radius: 50%; animation: spin .9s linear infinite; margin: 20px auto; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.check { width: 72px; height: 72px; border-radius: 50%; background: var(--ok); color: #fff; display: grid; place-items: center; font-size: 40px; margin: 6px auto 14px; }
+.center { text-align: center; }
+code, .code { font-family: ui-monospace, Menlo, monospace; font-size: 13px; word-break: break-all; background: var(--bg); padding: 2px 6px; border-radius: 6px; }
+.toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.toast.show { opacity: 1; }
+.hidden { display: none !important; }
+ul.clean { list-style: none; padding: 0; margin: 0; }
+ul.clean li { padding: 8px 0; border-bottom: 1px solid var(--line); }
+.hint { background: var(--soft); border-radius: 10px; padding: 10px 12px; font-size: 14px; }
+footer { color: var(--muted); font-size: 12px; text-align: center; padding: 24px 0; }
